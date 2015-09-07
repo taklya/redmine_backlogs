@@ -116,7 +116,16 @@ module Backlogs
             self.fixed_version = self.story.fixed_version if self.story
             self.start_date = Date.today if self.start_date.blank? && self.status_id != IssueStatus.default.id
 
-            self.tracker = Tracker.find(RbTask.tracker) unless self.tracker_id == RbTask.tracker
+            #self.tracker = Tracker.find(RbTask.tracker) unless self.tracker_id == RbTask.tracker
+			
+			#SAK : Added patch for Epic.
+			[self.parent_id, self.parent_id_was].compact.uniq.each{|pid|
+				p = Issue.find(pid)
+				p.update_attribute(:tracker_id, 8)
+				p.history.save
+			}
+			# SAK End patch
+			
           elsif self.is_story? && Backlogs.setting[:set_start_and_duedates_from_sprint]
             if self.fixed_version
               self.start_date ||= (self.fixed_version.sprint_start_date || Date.today)
